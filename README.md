@@ -239,7 +239,7 @@ An ingress controller configures ingress resources that allow traffic into the c
 
     ```sh
     kubectl cordon k8-t1-n1
-    kubectl drain k8-t1-n1 --force
+    kubectl drain k8-t1-n1 --ignore-daemonsets
     ```
 
     The node can now safely be managed.
@@ -258,7 +258,7 @@ An ingress controller configures ingress resources that allow traffic into the c
     helm upgrade --install --force chaos stable/chaoskube \
     --set imageTag=v0.16.0-arm32v6 \
     --set namespaces=default \
-    --set labels="app=kubernetes-rocks" \
+    --set labels="app.kubernetes.io/name=lmw-leaf" \
     --set dryRun=false \
     --set rbac.create=true \
     --set interval=5s

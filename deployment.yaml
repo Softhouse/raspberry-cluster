@@ -38,7 +38,7 @@ spec:
         #blinktColor: FF00FF #pink
     spec:
       containers:
-      - image: istmowday/lmw-leaf:arm-1.0
+      - image: istmowday/lmw-leaf:arm-1.4
         name: lmw-leaf
         ports:
         - containerPort: 3000
@@ -50,3 +50,8 @@ spec:
           initialDelaySeconds: 1
           timeoutSeconds: 1
           periodSeconds: 1
+        env:
+        - name: NODENAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
