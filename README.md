@@ -19,30 +19,15 @@ On each node, `raspberrypi0.local` through `raspberrypi4.local` install docker, 
 Slightly modified from  [source](https://gist.github.com/alexellis/fdbc90de7691a1b9edb545c17da2d975).
 
 ```sh
-for i in {0..4}; do
-ssh pi@raspberrypi${i}.local '
+ssh pi@k8-t1-n1.local '
 curl -sSL get.docker.com | sh
 #sudo usermod pi -aG docker
-
-sudo dphys-swapfile swapoff && \
-  sudo dphys-swapfile uninstall && \
-  sudo update-rc.d dphys-swapfile remove
-sudo systemctl disable dphys-swapfile.service
 
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add - && \
   echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list && \
   sudo apt-get update -q && \
   sudo apt-get install -qy kubeadm
-
-sudo sed -i -e "s#rootwait.*#rootwait cgroup_enable=cpuset cgroup_memory=1#" /boot/cmdline.txt
-
-#workaround for https://github.com/weaveworks/weave/issues/3717
-sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-echo y | sudo rpi-update
-
-sudo halt --reboot'
-done
+'
 ```
 
 ### Master Node
@@ -54,7 +39,7 @@ See "Master Node Setup" from [source](https://medium.com/nycdev/k8s-on-pi-9cc148
 Prepare the master node, once joined create a locally owned copy of the kubernetes credentials that can be copied to the workstation using scp:
 
 ```sh
-ssh pi@raspberrypi0.local '
+ssh pi@k8-t1-n1.local '
 sudo kubeadm config images pull -v3
 sudo kubeadm init --token-ttl=0
 sudo cp /etc/kubernetes/admin.conf .
@@ -77,10 +62,10 @@ kubeadm join 192.168.10.140:6443 --token r3xyoq.t92yjpgsdrf0y7e4 \
 To join the slaves you can manually log in to each node and run the command, or execute:
 
 ```sh
-TOKEN=$(ssh pi@raspberrypi0.local sudo kubeadm token list  | awk 'NR==2 {print $1}')
-CERT_HASH=$(ssh pi@raspberrypi0.local openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //')
-for i in {2..4}; do
-ssh pi@raspberrypi${i}.local sudo kubeadm join raspberrypi0:6443 --token ${TOKEN} --discovery-token-ca-cert-hash sha256:${CERT_HASH}
+TOKEN=$(ssh pi@k8-t1-n1.local sudo kubeadm token list  | awk 'NR==2 {print $1}')
+CERT_HASH=$(ssh pi@k8-t1-n1.local openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //')
+for i in {2..3}; do
+ssh pi@k8-t1-n${i}.local sudo kubeadm join k8-t1-n1:6443 --token ${TOKEN} --discovery-token-ca-cert-hash sha256:${CERT_HASH}
 done
 ```
 
@@ -89,15 +74,23 @@ done
 Get the credentials from the master node:
 
 ```sh
-#mkdir -p $HOME/.kube
-#touch $HOME/.kube/config
-#scp pi@raspberrypi0.local:~/admin.conf $HOME/.kube/config.raspberry
-#KUBECONFIG=~/.kube/config:~/.kube/config.raspberry
-#kubectl config view --flatten > ~/.kube/config2
+scp pi@raspberrypi0.local:~/admin.conf $HOME/.kube/config.raspberry
 
 export KUBECONFIG=~/.kube/config.raspberry
 sed -i -e 's#server: .*#server: https://raspberrypi0:6443#' $KUBECONFIG
 ```
+
+### Is working?
+nope....
+```
+kubectl get nodes
+```
+:(
+
+```
+kubectl get pods -n kube-system
+```
+Coredns is sad because no friends
 
 ### Add a network driver
 
@@ -144,12 +137,10 @@ https://github.com/apprenda/blinkt-k8s-controller
 
     ```sh
         #kubectl taint nodes raspberrypi0 node-role.kubernetes.io/master=:NoSchedule
-        kubectl taint nodes raspberrypi0 node-role.kubernetes.io/master:NoSchedule-
-        kubectl label node raspberrypi0 deviceType=blinkt
-        kubectl label node raspberrypi1 deviceType=blinkt
-        kubectl label node raspberrypi2 deviceType=blinkt
-        kubectl label node raspberrypi3 deviceType=blinkt
-        kubectl label node raspberrypi4 deviceType=blinkt
+        kubectl taint nodes k8-t1-n1 node-role.kubernetes.io/master:NoSchedule-
+        kubectl label node k8-t1-n1 deviceType=blinkt
+        kubectl label node k8-t1-n2 deviceType=blinkt
+        kubectl label node k8-t1-n3 deviceType=blinkt
     ```
 
 1. Set Role Based Acces Control (RBAC) policies to allow the blinkt controller to run with the proper permissions. RBAC controls access to the kubernetes API and namespaces, allowing fine grained access control of cluster resources.
@@ -186,17 +177,9 @@ https://github.com/apprenda/blinkt-k8s-controller
     The App looks for a lable on the node called failure domain:
 
     ```sh
-    kubectl label node raspberrypi0 failure-domain.beta.kubernetes.io/zone=raspberrypi0
-    kubectl label node raspberrypi1 failure-domain.beta.kubernetes.io/zone=raspberrypi1
-    kubectl label node raspberrypi2 failure-domain.beta.kubernetes.io/zone=raspberrypi2
-    kubectl label node raspberrypi3 failure-domain.beta.kubernetes.io/zone=raspberrypi3
-    kubectl label node raspberrypi4 failure-domain.beta.kubernetes.io/zone=raspberrypi4
-    ```
-
-    The app needs to have access to read labels:
-
-    ```sh
-    kubectl apply -f allow-anonymous-node-reader.yaml
+    kubectl label node k8-t1-n1 failure-domain.beta.kubernetes.io/zone=k8-t1-n1
+    kubectl label node k8-t1-n2 failure-domain.beta.kubernetes.io/zone=k8-t1-n2
+    kubectl label node k8-t1-n3 failure-domain.beta.kubernetes.io/zone=k8-t1-n3
     ```
 
     Reload the web page, the failure zone should be visible in the top right corner
@@ -255,8 +238,8 @@ An ingress controller configures ingress resources that allow traffic into the c
 1. Cordon and Drain a node to offload services:
 
     ```sh
-    kubectl cordon raspberrypi1
-    kubectl drain raspberrypi1 --force
+    kubectl cordon k8-t1-n1
+    kubectl drain k8-t1-n1 --force
     ```
 
     The node can now safely be managed.
