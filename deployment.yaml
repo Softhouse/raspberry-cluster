@@ -20,7 +20,7 @@ metadata:
     app.kubernetes.io/name: lmw-leaf
   name: lmw-leaf
 spec:
-  replicas: 5
+  replicas: 18
   selector:
     matchLabels:
       app.kubernetes.io/name: lmw-leaf
@@ -29,14 +29,24 @@ spec:
       labels:
         app.kubernetes.io/name: lmw-leaf
         blinkt: show
-        blinktColor: 00FF00 #green
-        #blinktColor: FF0000 #red
+        # blinktColor: 00FF00 #green
+        # blinktColor: FF0000 #red
         # blinktColor: "FF4000" #yellow
-        #blinktColor: 00FFFF #aqua
+        blinktColor: 00FFFF #aqua
         # blinktColor: 0000FF #blue
         # blinktColor: 8000FF #purple
         #blinktColor: FF00FF #pink
     spec:
+      terminationGracePeriodSeconds: 0
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 10
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 10
       containers:
       - image: istmowday/lmw-leaf:arm-1.4
         name: lmw-leaf
@@ -50,6 +60,9 @@ spec:
           initialDelaySeconds: 1
           timeoutSeconds: 1
           periodSeconds: 1
+        resources:
+          requests:
+            cpu: 1000m
         env:
         - name: NODENAME
           valueFrom:

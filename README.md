@@ -261,7 +261,7 @@ An ingress controller configures ingress resources that allow traffic into the c
     --set labels="app.kubernetes.io/name=lmw-leaf" \
     --set dryRun=false \
     --set rbac.create=true \
-    --set interval=5s
+    --set interval=200ms
     ```
 
 1. Let's put some load on
