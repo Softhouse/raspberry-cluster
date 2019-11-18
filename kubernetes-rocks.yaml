@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubernetes-rocks
+  labels:
+    app: kuberneres-rocks
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: kubernetes-rocks
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubernetes-rocks
+spec:
+  selector:
+    matchLabels:
+      app: kubernetes-rocks
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: kubernetes-rocks
+        blinkt: show
+        #blinktColor: 00FF00 #green
+        #blinktColor: FF0000 #red
+        blinktColor: "FF4000" #yellow
+        #blinktColor: 00FFFF #aqua
+        #blinktColor: 0000FF #blue
+        #blinktColor: 8000FF #purple
+        #blinktColor: FF00FF #pink
+    spec:
+      affinity:
+#        podAntiAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#          - labelSelector:
+#              matchExpressions:
+#              - key: app
+#                operator: In
+#                values:
+#                - nginx-ingress
+#            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: kubernetes-rocks
+        image: jonaseck/kubernetes-rocks
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 0
+          periodSeconds: 1
+          timeoutSeconds: 3
+        env:
+        - name: NODENAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: NODE_TLS_REJECT_UNAUTHORIZED
+          value: "0"
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: node-reader
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list"]
+- nonResourceURLs: ['/v1/nodes/*']
+  verbs: ['get']
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-system-anonymous-node-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: node-reader
+subjects:
+  - kind: User
+    name: system:anonymous

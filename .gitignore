@@ -1,0 +1,8 @@
+/config/.HA_VERSION
+/config/.uuid
+/config/*.db
+/config/*.log
+/config/tts/
+/config/deps/
+*secrets.yaml
+google-application-credentials.json
