@@ -340,7 +340,7 @@ This section is from [Source](https://github.com/apprenda/blinkt-k8s-controller)
 1. Let's scale it:
 
     ```sh
-    kubectl scale --replicas=10 deployment/lmw-leaf
+    kubectl scale --replicas=16 deployment/lmw-leaf
     ```
 
     Lot's of moles and green LEDs! Check the status
@@ -537,7 +537,7 @@ Let's simulate some instabillity
     --set labels='app!=nginx-ingress' \
     --set dryRun=false \
     --set rbac.create=true \
-    --set interval=500ms
+    --set interval=1s
     ```
 
 1. Let's generate some load  through the the NodePort service:
@@ -673,3 +673,33 @@ The kubernetes dashboard provides simple metrics and a graphical management tool
     You now see the output of the lmw-leaf service
 
 From [source](https://hub.docker.com/r/kubernetesui/dashboard).
+
+## Revenge of the Moles
+
+The moles will no longer be repressed
+
+1. Uninstall chaoskube
+
+    Helm charts can easily be removed:
+
+    ```sh
+    helm delete chaos
+    ```
+
+    Your cluster should now be healthy
+
+1. Reduce the cpu resource requests and increase the number of moles
+
+```sh
+kubectl patch deployment lmw-leaf --patch "
+spec:
+  replicas: 30
+  template:
+    spec:
+      containers:
+      - name: lmw-leaf
+        resources:
+          requests:
+            cpu: 100m
+"
+```
