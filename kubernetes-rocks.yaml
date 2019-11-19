@@ -34,16 +34,17 @@ spec:
         #blinktColor: 8000FF #purple
         #blinktColor: FF00FF #pink
     spec:
-      affinity:
-#        podAntiAffinity:
-#          requiredDuringSchedulingIgnoredDuringExecution:
-#          - labelSelector:
-#              matchExpressions:
-#              - key: app
-#                operator: In
-#                values:
-#                - nginx-ingress
-#            topologyKey: "kubernetes.io/hostname"
+      terminationGracePeriodSeconds: 0
+      # affinity:
+      #  podAntiAffinity:
+      #    requiredDuringSchedulingIgnoredDuringExecution:
+      #    - labelSelector:
+      #        matchExpressions:
+      #        - key: app
+      #          operator: In
+      #          values:
+      #          - nginx-ingress
+      #      topologyKey: "kubernetes.io/hostname"
       containers:
       - name: kubernetes-rocks
         image: jonaseck/kubernetes-rocks

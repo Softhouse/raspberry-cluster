@@ -2,14 +2,13 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: kubernetes-rocks
-  annotations:
-#    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  annotations: {}
 spec:
   rules:
   - http:
       paths:
-      - #host: raspberrypi0
-        #path: /rocks(/|$)(.*)
+      - #host: k8-t<team>-n1
+        path: /
         backend:
           serviceName: kubernetes-rocks
           servicePort: http
