@@ -670,4 +670,6 @@ The kubernetes dashboard provides simple metrics and a graphical management tool
 
     `http://localhost:8001/api/v1/namespaces/default/services/http:lmw-leaf:3000/proxy/`
 
+    You now see the output of the lmw-leaf service
+
 From [source](https://hub.docker.com/r/kubernetesui/dashboard).
