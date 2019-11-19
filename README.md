@@ -525,10 +525,10 @@ Let's simulate some instabillity
     helm upgrade --install --force chaos stable/chaoskube \
     --set imageTag=v0.16.0-arm32v6 \
     --set namespaces=default \
-    --set labels='!app=nginx-ingress' \
+    --set labels='app!=nginx-ingress' \
     --set dryRun=false \
     --set rbac.create=true \
-    --set interval=5s
+    --set interval=500ms
     ```
 
 1. Let's generate some load  through the the NodePort service:
