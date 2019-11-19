@@ -34,7 +34,8 @@ spec:
         #blinktColor: 8000FF #purple
         #blinktColor: FF00FF #pink
     spec:
-      affinity:
+      terminationGracePeriodSeconds: 0
+      # affinity:
 #        podAntiAffinity:
 #          requiredDuringSchedulingIgnoredDuringExecution:
 #          - labelSelector:

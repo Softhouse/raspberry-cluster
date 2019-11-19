@@ -8,7 +8,7 @@ The raspberry pi cluster is connected to the internet and is accessible from the
 
 Basic knowledge of linux and SSH is expected
 
-You've been given raspberry pi clusters with unique IP addresses and node names. Each raspberrypi has been preconfigured to run kubernetes.
+Each team has been given their own raspberry pi cluster with unique IP addresses and node names. Each raspberrypi has been preconfigured to run kubernetes.
 
 ### Tools
 
@@ -18,7 +18,7 @@ You've been given raspberry pi clusters with unique IP addresses and node names.
 
 ## Creating a Kubernetes cluster
 
-Organize yourselves so that each team member chooses 1 node to configure then perform the following steps:
+Each cluster consists of 4 nodes. Organize yourselves so that each team member chooses 1 node to configure then perform the following steps:
 
 1. SSH into your node `k8-t<team>-n<node>.local`
 
@@ -91,6 +91,8 @@ The kubernetes API resides on the master node(s). The kubernetes CLI `kubectl` s
 
 Get the join command containing the token and certificate hash from the team member assigned to the master node.
 
+**NOTE** If you have node number 4, please wait with this step. Only nodes 1, 2 and 3 should be added to the cluster at this stage.
+
 1. Execute the command and join the master to form a cluster:
 
     ```sh
@@ -131,7 +133,6 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
     raspberrypi1   NotReady    <none>   2m   v1.16.3
     raspberrypi2   NotReady    <none>   2m   v1.16.3
     raspberrypi3   NotReady    <none>   2m   v1.16.3
-    raspberrypi4   NotReady    <none>   2m   v1.16.3
     ```
 
 1. Check the status of the pods in the kubernetes system namespace:
@@ -140,16 +141,19 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
     kubectl get pods -n kube-system
     ```
 
-    The coredns pods are running, but not answering on health checks due to a missing
+    The coredns pods are running, but not answering on health checks due to a missing network driver
 
     ```terminal
     NAME                                   READY   STATUS    RESTARTS   AGE
-    coredns-5644d7b6d9-kp5dh               0/1     Running   2          2m
-    coredns-5644d7b6d9-tbrvm               0/1     Running   2          2m
-    etcd-raspberrypi0                      1/1     Running   2          2m
-    kube-apiserver-raspberrypi0            1/1     Running   2          2m
-    kube-controller-manager-raspberrypi0   1/1     Running   2          2m
-    kube-scheduler-raspberrypi0            1/1     Running   2          2m
+    coredns-5644d7b6d9-nsvl9           0/1     Pending   0          3m16s
+    coredns-5644d7b6d9-s62lp           0/1     Pending   0          3m16s
+    etcd-k8-t5-n1                      1/1     Running   0          2m24s
+    kube-apiserver-k8-t5-n1            1/1     Running   0          2m16s
+    kube-controller-manager-k8-t5-n1   1/1     Running   0          2m37s
+    kube-proxy-bb5p6                   1/1     Running   0          2m14s
+    kube-proxy-m48xp                   1/1     Running   0          3m16s
+    kube-proxy-wcdrr                   1/1     Running   0          2m2s
+    kube-scheduler-k8-t5-n1            1/1     Running   0          2m13s
     ```
 
 ### Add a network driver
@@ -203,7 +207,7 @@ Table of LED colors:
 |<span style="color:red">Red</span>  |whack a pod (initially)
 |<span style="color:green">Green</span>  |whack a pod (after upgrade)
 |<span style="color:yellow">Yellow</span>  |node presentation
-|<span style="color:blue">Blue</span> |404-service   |nginx ingress
+|<span style="color:blue">Blue</span> | nginx ingress
 |<span style="color:purple">Purple</span> |404-service
 |<span style="color:green">Green flash</span> |pod is starting
 |<span style="color:red">Red flash</span>   |pod is terminating
@@ -358,7 +362,7 @@ This section is from [Source](https://github.com/apprenda/blinkt-k8s-controller)
     Warning  FailedScheduling  <unknown>  default-scheduler  0/3 nodes are available: 3 Insufficient cpu.
     ```
 
-    The application has a resource requirement to be scheduled on a node and we don't have enough.
+    The application has a resource requirement when being scheduled on a node and we don't have enough resources to run all pods.
 
     ```sh
     grep resources: -A2 deployment.yaml
