@@ -7,7 +7,7 @@ spec:
   rules:
   - http:
       paths:
-      - #host: raspberrypi0
+      - #host: k8-t<team>-n1
         path: /
         backend:
           serviceName: kubernetes-rocks

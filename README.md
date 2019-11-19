@@ -20,9 +20,9 @@ Each team has been given their own raspberry pi cluster with unique IP addresses
 
 Each cluster consists of 4 nodes. Organize yourselves so that each team member chooses 1 node to configure then perform the following steps:
 
-1. SSH into your node `k8-t<team>-n<node>.local`
+1. SSH into your node `k8-t<team>-n<node>`
 
-    **NOTE** On some machines, `.local` should be omitted, or use `.lan` or `.localdomain` instead.
+    **NOTE** On some machines, `.local`, `.lan` or `.localdomain` should be added as suffix.
 
     ```sh
     ssh pi@k8-t<team>-n<node>
@@ -69,6 +69,8 @@ The kubernetes API resides on the master node(s). The kubernetes CLI `kubectl` s
 
 1. Initialize the cluster, your teammates will have to join within 10 minutes:
 
+    **NOTE:** If you are assigned node number `4` do not join the cluster at this stage. If you accidentally do, please execute `sudo kubeadm reset` on the node and `kubectl delete node k8-t<team>-n4` to remove yourself from the cluster.
+
     ```sh
     sudo kubeadm init --token-ttl=10m
     ```
@@ -107,7 +109,7 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
 1. Log in to the master node and create a copy of the credentials that is readable by the pi user:
 
     ```sh
-    ssh raspberrypi0
+    ssh k8-t<team>-n1
     sudo cp /etc/kubernetes/admin.conf .
     sudo chown $(id -u):$(id -g) admin.conf
     exit
@@ -115,9 +117,11 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
 
 1. On your workstation copy the credentials file using scp:
 
+    **Warning** If you have existing kubernetes configuration, back it up before executing the command below as it will overwrite the configuration.
+
     ```sh
     mkdir ~/.kube/conf
-    scp pi@raspberrypi0.local:~/admin.conf ~/.kube/config
+    scp pi@k8s-t<team>-n1.local:~/admin.conf ~/.kube/config
     ```
 
 1. Check the status of the nodes:
@@ -129,10 +133,10 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
     The nodes are connected but not ready to recieve workloads.
 
     ```terminal
-    raspberrypi0   NotReady    master   2m   v1.16.3
-    raspberrypi1   NotReady    <none>   2m   v1.16.3
-    raspberrypi2   NotReady    <none>   2m   v1.16.3
-    raspberrypi3   NotReady    <none>   2m   v1.16.3
+    k8-t1-n1   NotReady   master   6m39s   v1.16.3
+    k8-t1-n2   NotReady   <none>   5m45s   v1.16.3
+    k8-t1-n3   NotReady   <none>   5m41s   v1.16.3
+    k8-t1-n4   NotReady   <none>   5m37s   v1.16.3
     ```
 
 1. Check the status of the pods in the kubernetes system namespace:
@@ -156,7 +160,7 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
     kube-scheduler-k8-t5-n1            1/1     Running   0          2m13s
     ```
 
-### Add a network driver
+## Add a network driver
 
  The node network driver adds an overlay network on the cluster that allows cross-node communication.
 
@@ -177,22 +181,23 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
     Wait until all pods are in the `Running` state. Note that weave-net pods have been added to all nodes. To see which pod is running on what node `-o wide` can be added to the above command.
 
     ```terminal
-    coredns-5644d7b6d9-bnnbd               1/1     Running   0          159m
-    coredns-5644d7b6d9-srxpc               1/1     Running   0          159m
-    etcd-raspberrypi0                      1/1     Running   3          158m
-    kube-apiserver-raspberrypi0            1/1     Running   3          158m
-    kube-controller-manager-raspberrypi0   1/1     Running   4          158m
-    kube-proxy-228w8                       1/1     Running   3          107m
-    kube-proxy-d5hs7                       1/1     Running   3          106m
-    kube-proxy-fd8lw                       1/1     Running   3          106m
-    kube-proxy-h4jnm                       1/1     Running   3          159m
-    kube-proxy-k6z7n                       1/1     Running   3          120m
-    kube-scheduler-raspberrypi0            1/1     Running   4          158m
-    weave-net-dhfnz                        2/2     Running   11         27m
-    weave-net-f7c5c                        2/2     Running   11         27m
-    weave-net-kpk4j                        2/2     Running   10         27m
-    weave-net-m8fr4                        2/2     Running   12         27m
-    weave-net-rb8vf                        2/2     Running   11         27m
+    NAME                             READY  STATUS  RESTARTS AGE
+    coredns-5644d7b6d9-bnnbd         1/1    Running 0        159m
+    coredns-5644d7b6d9-srxpc         1/1    Running 0        159m
+    etcd-k8-t1-n1                    1/1    Running 3        158m
+    kube-apiserver-k8-t1-n1          1/1    Running 3        158m
+    kube-controller-manager-k8-t1-n1 1/1    Running 4        158m
+    kube-proxy-228w8                 1/1    Running 3        107m
+    kube-proxy-d5hs7                 1/1    Running 3        106m
+    kube-proxy-fd8lw                 1/1    Running 3        106m
+    kube-proxy-h4jnm                 1/1    Running 3        159m
+    kube-proxy-k6z7n                 1/1    Running 3        120m
+    kube-scheduler-k8-t1-n1          1/1    Running 4        158m
+    weave-net-dhfnz                  2/2    Running 11       27m
+    weave-net-f7c5c                  2/2    Running 11       27m
+    weave-net-kpk4j                  2/2    Running 10       27m
+    weave-net-m8fr4                  2/2    Running 12       27m
+    weave-net-rb8vf                  2/2    Running 11       27m
     ```
 
 ## Blinkt LEDs
@@ -239,10 +244,10 @@ Table of LED colors:
     ```
 
     ```terminal
-    NAME                  DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                 AGE
-    blinkt-k8s-controller 0         0         0       0            0           deviceType=blinkt             21h
-    kube-proxy            5         5         5       5            5           beta.kubernetes.io/os=linux   22h
-    weave-net             5         5         5       5            5           <none>                        21h
+    NAME                    DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                 AGE
+    blinkt-k8s-controller   0         0         0       0            0           deviceType=blinkt             8s
+    kube-proxy              3         3         3       3            3           beta.kubernetes.io/os=linux   9m24s
+    weave-net               3         3         3       3            3           <none>                        2m1s                      2m1s
     ```
 
     The Daemonset reports that it wants 0 pods running in the cluster. Looking at the `NODE SELECTOR` column, we can see that it requires a label on the node to start the pod. This way, node labels can be used to add services that have special hardware or requirements.
@@ -282,7 +287,7 @@ Table of LED colors:
     If you want to taint it again, execute the following command, you'll see the daemonset flashing red as the pod is evicted.
 
     ```sh
-    kubectl taint nodes raspberrypi0 node-role.kubernetes.io/master=:NoSchedule
+    kubectl taint nodes k8-t<team>-n1 node-role.kubernetes.io/master=:NoSchedule
     ```
 
     Untaint the master again so that all LED strips are active.
@@ -335,7 +340,7 @@ This section is from [Source](https://github.com/apprenda/blinkt-k8s-controller)
 1. Let's scale it:
 
     ```sh
-    kubectl scale --replicas=16 deployment/lmw-leaf
+    kubectl scale --replicas=10 deployment/lmw-leaf
     ```
 
     Lot's of moles and green LEDs! Check the status
@@ -385,12 +390,16 @@ Node 4 to the rescue!
     ```sh
         ssh k8-t<team>-n4
         sudo kubeadm join 192.168.10.140:6443 --token r3xyoq.t92yjpgsdrf0y7e4 \
-            --discovery-token-ca-cert-hash sha256:0d919582cbce47e25a8ac22f7166c9633816475b8a87be749d62953c0ef492f0
+            --discovery-token-ca-cert-hash sha256:0d919582cbce47e25a8ac22f7166c9633816475b8a87be749d62953c0ef492f0 -v=1
     ```
 
-    That didn't work. The token has expired!
+    That didn't work. The token has expired! stop waiting by pressing `ctrl+c`.
 
-1. Generate a new token:
+    ```terminal
+    Failed to connect to API Server "192.168.10.140:6443": token id "krl4bq" is invalid for this cluster or it has expired. Use "kubeadm token create" on the control-plane node to create a new valid token
+    ```
+
+1. Create a new token:
 
     ```sh
     ssh k8-t<team>-n1
@@ -401,7 +410,7 @@ Node 4 to the rescue!
 
     ```terminal
     ssh k8-t<team>-n4
-    sudo kubeadm join 192.168.40.107:6443 --token kh3pz3.s31hmgt9e31jdp0i     --discovery-token-ca-cert-hash sha256:e48ae4a31280d4057caf6ef60d86055c51ea0bf1619a006038d4f34ce5a21a95
+    sudo kubeadm join 192.168.40.107:6443 --token kh3pz3.s31hmgt9e31jdp0i     --discovery-token-ca-cert-hash sha256:e48ae4a31280d4057caf6ef60d86055c51ea0bf1619a006038d4f34ce5a21a95 -v1
     ```
 
 1. Check that the node has joined, and wait for it to be in a `Ready` state:
@@ -416,7 +425,7 @@ Node 4 to the rescue!
     kubectl label node k8-t<team>-n4 deviceType=blinkt
     ```
 
-1. All of your pods should now be running:
+1. All of your pods should now be in `Running` state:
 
     ```sh
     kubectl get pods
@@ -445,15 +454,15 @@ Node 4 to the rescue!
     kubernetes-rocks   NodePort   10.105.251.110   <none>        8000:30631/TCP   11m
     ```
 
-    In the above example, the service is assigned to port 30631, browsing to `http://raspberrypi0:30631` should show the page.
+    In the above example, the service is assigned to port 30631, browsing to `http://k8-t<team>-n<node>:30631` should show the page.
 
 1. Label the nodes to see where the application is running:
 
     ```sh
-    kubectl label node k8-t1-n1 failure-domain.beta.kubernetes.io/zone=k8-t1-n1
-    kubectl label node k8-t1-n2 failure-domain.beta.kubernetes.io/zone=k8-t1-n2
-    kubectl label node k8-t1-n3 failure-domain.beta.kubernetes.io/zone=k8-t1-n3
-    kubectl label node k8-t1-n4 failure-domain.beta.kubernetes.io/zone=k8-t1-n3
+    kubectl label node k8-t<team>-n1 failure-domain.beta.kubernetes.io/zone=k8-t1-n1
+    kubectl label node k8-t<team>-n2 failure-domain.beta.kubernetes.io/zone=k8-t1-n2
+    kubectl label node k8-t<team>-n3 failure-domain.beta.kubernetes.io/zone=k8-t1-n3
+    kubectl label node k8-t<team>-n4 failure-domain.beta.kubernetes.io/zone=k8-t1-n4
     ```
 
     The application uses the kubernetes API to determine which failure zone it is running in. When we design kubernetes clusters we generally want multiple nodes in each failure zone, in the event of zone availability.
@@ -535,7 +544,7 @@ Let's simulate some instabillity
 
     ```sh
     npm install -g artillery
-    artillery quick --count 10 -n 20 http://raspberrypi0:30631
+    artillery quick --count 10 -n 20 http://t<team>-n<node>:<port>
     ```
 
     All traffic should generate an ok (200) response:
@@ -551,8 +560,8 @@ Let's simulate some instabillity
 1. Let's generate some load  through the the ingress service:
 
     ```sh
-    artillery quick --count 10 -n 20 http://raspberrypi0:30080
-    artillery quick --count 10 -n 20 http://raspberrypi0:30443
+    artillery quick --count 10 -n 20 http://t<team>-n<node>:30080
+    artillery quick --count 10 -n 20 http://t<team>-n<node>:30443
     ```
 
 ### Maintenance
@@ -562,8 +571,8 @@ Time to patch the servers without service downtime
 1. Cordon the node to prevent new pods from being scheduled:
 
     ```sh
-    kubectl cordon k8-t1-n1
-    kubectl drain k8-t1-n1 --ignore-daemonsets
+    kubectl cordon k8-t<team>-n1
+    kubectl drain k8-t<team>-n1 --ignore-daemonsets --force
     ```
 
     `Cordon` prevents new loads from being scheduled on the node.
@@ -573,12 +582,12 @@ Time to patch the servers without service downtime
 1. Uncordon the node to allow workloads to be scheduled again.
 
     ```sh
-    kubectl uncordon raspberrypi1
+    kubectl uncordon k8-t<team>-n1
     ```
 
 ### Affinity
 
-Affinity and anti-affinity can control which pods are scheduled together. Let's separate app pods from loadbalancer pods:
+Affinity and anti-affinity can control which pods are scheduled together. Let's separate some app pods from loadbalancer pods:
 
 1. Add an anti-affinity to the worker pods:
 
@@ -596,34 +605,69 @@ Affinity and anti-affinity can control which pods are scheduled together. Let's 
     #            topologyKey: "kubernetes.io/hostname"
     ```
 
-    The yellow worker pods are now separate from the blue loadbalancer pods
+    As the yellow worker pods are killed på chaos kube they should be scheduled separate from the blue loadbalancer pods
+
+1. Restart all the pods
+
+    Pods are cattle and can be slaughtered indiscriminately as they will be restarted as soon as possible. This will however result in downtime, and setting grace period 0 may lead to etcd corruption and in not recommended in production.
+
+    ```sh
+    kubectl delete pods --all --force --grace-period=0
+    ```
 
 ### Dashboard
 
-Let's add the kubernetes management dashboard, see [source](https://hub.docker.com/r/kubernetesui/dashboard) for more information:
+The kubernetes dashboard provides simple metrics and a graphical management tool for kubernetes.
 
-```sh
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/recommended.yaml
-```
+1. Apply the kubernetes-dashboard
 
-make the service account admin so all resources can be viewed and managed. This is not reocommended for production systems:
+    ```sh
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/recommended.yaml
+    ```
 
-```sh
-kubectl create clusterrolebinding kubernetes-dashboard-admin-binding --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:kubernetes-dashboard
-```
+1. make the service account cluster admin.
 
-Get the auth token and start the proxy server:
+    The kubernetes dashboard can only do what the logged in user is allowed to. Setting the service account as cluster admin and logging in as that user allows for cluster wide access. This is not reocommended for production systems:
 
-```sh
-kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | awk '/^kubernetes-dashboard-token-/{print $1}') | awk '$1=="token:"{print $2}'
-kubectl proxy
-```
+    ```sh
+    kubectl create clusterrolebinding kubernetes-dashboard-admin-binding --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:kubernetes-dashboard
+    ```
 
-browse to `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`, select **Token** login and paste the toke  from the above command.
+1. Get the auth token:
 
-```sh
-curl -sSL https://raw.githubusercontent.com/kubernetes/heapster/master/deploy/kube-config/influxdb/grafana.yaml | sed "s@image: .*@image: angelnu/heapster-grafana:v5.0.4@" | sed 's@value: /$@#value: /@g' | sed 's/# value:/value:/g' > grafana.yaml
-curl -sSL https://raw.githubusercontent.com/kubernetes/heapster/master/deploy/kube-config/influxdb/heapster.yaml | sed "s@image: .*@image: angelnu/heapster:v1.5.4@" > heapster.yaml
-curl -sSL https://raw.githubusercontent.com/kubernetes/heapster/master/deploy/kube-config/influxdb/influxdb.yaml | sed "s@image: .*@image: angelnu/heapster-influxdb:v1.3.3@" > influxdb.yaml
-```
+    The kubernetes dashboard uses auth tokens to log in. The user or service account determines the level of access:
 
+    ```sh
+    kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | awk '/^kubernetes-dashboard-token-/{print $1}') | awk '$1=="token:"{print $2}'
+    ```
+
+    Copy the entire token from terminal as we'll require it shortly:
+
+    ```terminal
+    eyJhbGciOiJSUzI1NiIsImtpZCI6InhJb3RJNWxodklSUlRxbHVPUllZczgzSURxeXhYelRHVFhvNFFIRmoza2cifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJrdWJlcm5ldGVzLWRhc2hib2FyZC10b2tlbi05cDg0NSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjYzYjIyNTlkLTg3NDUtNDg1ZC1iMjA2LWIzYWNiNDJiOWFkZSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlcm5ldGVzLWRhc2hib2FyZDprdWJlcm5ldGVzLWRhc2hib2FyZCJ9.ivR84ABsG6ikYxAkfet9HeTHP0zApTtscxmKG_a5waJ3tVejF0pUQpbf1TBdKPFr1rPvvMwlADCSBBWJ2moz3svsqUHUt6KGX0zAD-BqpQN9JjQYIscZgOUvACH9Q2QbP5GwQxUI-DOcBEEb_WdAXSpRyp4G4h-Nv_4CoEexMfvmUzlJnnzDGvLBaSL7Fh597AogY84dft9QOrb8bw1nbHPmcAMwPSuuqNAPPbMtiyYyOq_JfU5-bDzR1znEKbzj05dP0jqYQ-FHncQcJ2uMfoow50x0f557V_qSxPU-C-eBPudQ-TVhw3fOxq-xUpgRm9WvcRTyxMYhllafLcgMcA
+    ```
+
+1. Start the proxy server
+
+    Since the service is not exposed through the any service, we can start a kubernetes API proxy to access the service:
+
+    ```sh
+    kubectl proxy
+    ```
+
+    browse to `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`, select **Token** login and paste the token from the above command.
+
+1. Accessing any service
+
+    If you look closely at the above URI, you can replace the namespace, servicename and port to access any service:
+
+    Replace
+    * **namespace** with `default`
+    * **protocol** from `https` to `http`
+    * **port** add `3000`
+
+    **Result:**
+
+    `http://localhost:8001/api/v1/namespaces/default/services/http:lmw-leaf:3000/proxy/`
+
+From [source](https://hub.docker.com/r/kubernetesui/dashboard).
