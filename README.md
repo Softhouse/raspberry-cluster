@@ -102,7 +102,7 @@ Get the join command containing the token and certificate hash from the team mem
     sudo kubeadm join k8-t1-n1:6443 --token ${TOKEN} --discovery-token-ca-cert-hash sha256:${CERT_HASH}
     ```
 
-### kubectl Credentials for the master node
+### kubectl Credentials for the clusters
 
 kubectl stores credentials in a config file. Multiple credentials, or contexts, can be stored in the same file. Commands are sent to the active context.
 
