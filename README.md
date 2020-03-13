@@ -100,7 +100,7 @@ Get the join command containing the token and certificate hash from the team mem
 1. Execute the command and join the master to form a cluster:
 
     ```sh
-    ssh pi@k8-t<team>-n<node>.local
+    ssh pi@k8-t<team>-n<node>
     sudo kubeadm join k8-t1-n1:6443 --token ${TOKEN} --discovery-token-ca-cert-hash sha256:${CERT_HASH}
     ```
 
@@ -121,7 +121,7 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
 
     ```sh
     mkdir -p ~/.kube/config
-    scp pi@k8s-t<team>-n1.local:~/admin.conf ~/.kube/config
+    scp pi@k8-t<team>-n1:~/admin.conf ~/.kube/config
     ```
 
 1. Check the status of the nodes:
