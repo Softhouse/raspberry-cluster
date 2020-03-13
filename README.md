@@ -27,6 +27,8 @@ Each cluster consists of 4 nodes. Organize yourselves so that each team member c
     ```sh
     ssh pi@k8-t<team>-n<node>
     ```
+    
+    **Example:** `ssh pi@k8-t1-n1`
 
 1. Install Docker
 
