@@ -1,1 +1,91 @@
-/etc/ansible/hosts
+# This is the default ansible 'hosts' file.
+#
+# It should live in /etc/ansible/hosts
+#
+#   - Comments begin with the '#' character
+#   - Blank lines are ignored
+#   - Groups of hosts are delimited by [header] elements
+#   - You can enter hostnames or ip addresses
+#   - A hostname/ip can be a member of multiple groups
+
+# Ex 1: Ungrouped hosts, specify before any group headers.
+
+#green.example.com
+#blue.example.com
+#192.168.100.1
+#192.168.100.10
+
+# Ex 2: A collection of hosts belonging to the 'webservers' group
+
+#[webservers]
+#alpha.example.org
+#beta.example.org
+#192.168.1.100
+#192.168.1.110
+
+# If you have multiple hosts following a pattern you can specify
+# them like this:
+
+#www[001:006].example.com
+
+# Ex 3: A collection of database servers in the 'dbservers' group
+
+#[dbservers]
+#
+#db01.intranet.mydomain.net
+#db02.intranet.mydomain.net
+#10.25.1.56
+#10.25.1.57
+
+# Here's another example of host ranges, this time there are no
+# leading 0s:
+[all:vars]
+ansible_user=pi
+ansible_ssh_pass=raspberry
+deploy_target=pi
+#db-[99:101]-node.example.com
+
+[slaves:children]
+t1
+t2
+t3
+t4
+#t5
+
+
+[t1]
+192.168.33.11 h=k8-t1-n1
+192.168.33.12 h=k8-t1-n2
+192.168.33.13 h=k8-t1-n3
+192.168.33.14 h=k8-t1-n4
+
+[t2]
+192.168.33.23 h=k8-t2-n3
+192.168.33.22 h=k8-t2-n2
+192.168.33.21 h=k8-t2-n1
+192.168.33.24 h=k8-t2-n4
+
+[t3]
+192.168.33.31 h=k8-t3-n1
+192.168.33.32 h=k8-t3-n2
+192.168.33.33 h=k8-t3-n3
+192.168.33.34 h=k8-t3-n4
+
+[t4]
+192.168.33.41 h=k8-t4-n1
+192.168.33.42 h=k8-t4-n2
+192.168.33.43 h=k8-t4-n3
+192.168.33.44 h=k8-t4-n4
+
+#[t5]
+#192.168.33.51 h=k8-t5-n1
+#192.168.33.52 h=k8-t5-n2
+#192.168.33.53 h=k8-t5-n3
+#192.168.33.54 h=k8-t5-n4
+
+
+
+
+[master]
+192.168.33.2 h=k8-master1
+
