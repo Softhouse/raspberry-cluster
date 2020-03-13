@@ -1,0 +1,26 @@
+---
+- hosts: slaves
+  environment:
+    LC_ALL: C
+    LANG: C
+    serial: 20
+
+  tasks:
+
+  - name: Download script for blinkt
+    get_url:
+     url: https://get.pimoroni.com/blinkt 
+     dest: ~/blinkt.sh
+     mode: 0770
+
+  - name: Run installer for blinkt
+    command: ~/blinkt.sh -y
+    async: 300
+    poll: 5
+  
+  - name: Test blinking leds
+    command: python ~/Pimoroni/blinkt/examples/larson_hue.py
+    async: 10
+    poll: 2
+    tags: 
+    - test

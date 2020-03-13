@@ -1,0 +1,11 @@
+---
+- hosts: slaves
+  become: yes
+  become_user: root
+  environment:
+    LC_ALL: C
+    LANG: C
+
+  roles:
+    - common
+    - slaves

@@ -1,0 +1,23 @@
+---
+  - name: Copy VIMRC file
+    copy:
+      src: roles/common/files/vimrc
+      dest: /etc/vim/vimrc
+      owner: root
+      group: root
+      mode: 0655
+    register: cmdline
+    tags:
+     - vim
+
+  - name: Copy VIMRC local file
+    copy:
+      src: roles/common/files/vimrc.local
+      dest: /home/pi/.vimrc
+      owner: pi
+      group: pi
+      mode: 0755
+    register: cmdline
+    tags:
+     - vim
+

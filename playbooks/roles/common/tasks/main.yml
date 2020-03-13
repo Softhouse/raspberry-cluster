@@ -1,0 +1,5 @@
+---
+ - import_tasks: check-internet.yml
+ - import_tasks: apt-update.yml
+ - import_tasks: vim.yml
+ - import_tasks: rpi-update.yml

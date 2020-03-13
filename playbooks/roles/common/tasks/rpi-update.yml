@@ -1,0 +1,9 @@
+---
+
+  - name: Run RPI updater 
+    shell: echo y | rpi-update
+    async: 300
+    poll: 5
+    tags:
+     - rpi-update
+  

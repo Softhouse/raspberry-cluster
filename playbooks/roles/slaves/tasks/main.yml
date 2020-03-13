@@ -1,0 +1,8 @@
+---
+ - import_tasks: apt-update.yml
+ - import_tasks: cgroup-features.yml
+ - import_tasks: kubernetes-repo.yml
+ - import_tasks: disable-swap.yml
+ - import_tasks: iptables-legacy.yml
+ - import_tasks: set-hostname.yml
+ - import_tasks: test-setup.yml

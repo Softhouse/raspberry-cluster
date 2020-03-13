@@ -1,0 +1,27 @@
+---
+  - name: Add kub key
+    apt_key:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      state: present
+    register: key
+
+  - name: Add Kubernetes repo
+    apt_repository:
+      repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+      state: present
+
+  - name: update APT if needed
+    apt: update_cache=yes cache_valid_time=600
+    when: key is changed
+
+#  - name: Copy config.txt setting gpu mem and fan speed
+#    copy:
+#      src: files/config.txt
+#      dest: /boot/config.txt
+#      owner: root
+#      group: root
+#      mode: 0755
+#    register: cmdline
+#    tags:
+#     - boot
+

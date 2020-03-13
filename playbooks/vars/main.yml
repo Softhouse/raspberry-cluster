@@ -1,0 +1,10 @@
+---
+# Docker configuration.
+docker_install_compose: false
+docker_users:
+  - pi
+
+# Swap configuration.
+swap_file_state: absent
+swap_file_path: /dev/mapper/packer--debian--10--amd64--vg-swap_1
+

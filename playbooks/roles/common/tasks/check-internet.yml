@@ -1,0 +1,7 @@
+---
+- name: Test Internet
+  uri:
+   url: "https://google.com"
+  tags: internet
+  
+  

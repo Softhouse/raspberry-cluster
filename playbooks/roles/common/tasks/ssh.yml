@@ -1,0 +1,9 @@
+---
+  - name: Set authorized key taken from file
+    authorized_key:
+      user: pi
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    tags: 
+     - ssh
+

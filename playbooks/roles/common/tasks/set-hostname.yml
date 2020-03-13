@@ -1,0 +1,46 @@
+---
+    - name: Assign names to the Controllers
+      hostname:
+       name: "{{h}}"
+      tags:
+      - hostname
+
+      #- name: Set the hostname
+      # become: yes
+      #command: hostnamectl set-hostname "{{ h }}"
+
+    - name: copy empty hosts file... in case
+      copy:
+        src: roles/common/files/hosts
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: 0644
+      tags:
+       - hostname
+
+
+    - name: Fix /etc/hosts removing the old hostname
+      lineinfile:
+       state: present
+       dest: /etc/hosts
+       line: "{{ ansible_default_ipv4.address }} {{ h }} {{ ansible_hostname }}"
+       regexp: "^{{ ansible_default_ipv4.address }}"
+      when:
+        ansible_fqdn != inventory_hostname
+      tags:
+      - hostname
+
+     
+    - name: Update /etc/hosts with new hostname
+      become: yes
+      lineinfile:
+       dest: /etc/hosts
+       regexp: "^127.0.1.1\t{{ ansible_hostname }}$"
+       line: "127.0.1.1\t{{ h }}"
+      when:
+        ansible_fqdn != inventory_hostname
+      tags:
+      - hostname
+
+

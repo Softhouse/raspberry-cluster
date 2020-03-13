@@ -1,0 +1,7 @@
+---
+- hosts: slaves
+  become: true
+  become_user: root
+  tasks:
+          - name: Rebooting all machines
+            reboot:

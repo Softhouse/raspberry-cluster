@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  environment:
+    LC_ALL: C
+    LANG: C
+
+
+  - import_playbook: slaves.yml
