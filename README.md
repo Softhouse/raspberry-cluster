@@ -18,7 +18,7 @@ Each team has been given their own raspberry pi cluster with unique IP addresses
 
 ## Creating a Kubernetes cluster
 
-Each cluster consists of 4 nodes. Organize yourselves so that each team member chooses 1 node to configure then perform the following steps:
+Each cluster consists of 4 nodes. Organize yourselves so that each team member chooses 1 node to configure then perform the following steps, entering the default password `raspberry` as password when prompted:
 
 1. SSH into your node `k8-t<team>-n<node>`
 
