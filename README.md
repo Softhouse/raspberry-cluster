@@ -120,7 +120,7 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
     **Warning** If you have existing kubernetes configuration, back it up before executing the command below as it will overwrite the configuration.
 
     ```sh
-    mkdir -p ~/.kube/config
+    mkdir -p ~/.kube
     scp pi@k8-t<team>-n1:~/admin.conf ~/.kube/config
     ```
 
