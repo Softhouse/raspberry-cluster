@@ -111,8 +111,9 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
 1. Log in to the master node and create a copy of the credentials that is readable by the pi user:
 
     ```sh
-    sudo cp /etc/kubernetes/admin.conf .
-    sudo chown $(id -u):$(id -g) admin.conf
+    mkdir -p ~/.kube
+    sudo cp /etc/kubernetes/admin.conf ~/.kube/config
+    sudo chown $(id -u):$(id -g) ~/.kube/config
     ```
 
 1. On your laptop or workstation copy the credentials file using scp:
@@ -121,7 +122,7 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
 
     ```sh
     mkdir -p ~/.kube
-    scp pi@k8-t<team>-n1:~/admin.conf ~/.kube/config
+    scp pi@k8-t<team>-n1:~/.kube/config ~/.kube/config
     ```
 
 1. Check the status of the nodes:
