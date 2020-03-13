@@ -89,6 +89,8 @@ The kubernetes API resides on the master node(s). The kubernetes CLI `kubectl` s
         --discovery-token-ca-cert-hash sha256:0d919582cbce47e25a8ac22f7166c9633816475b8a87be749d62953c0ef492f0
     ```
 
+    send the command to your teammates as they will use this to join to your master node
+
     This step is based on the "Master Node Setup" from this [source](https://medium.com/nycdev/k8s-on-pi-9cc14843d43).
 
 ### Worker Nodes
@@ -101,14 +103,14 @@ Get the join command containing the token and certificate hash from the team mem
 
     ```sh
     ssh pi@k8-t<team>-n<node>
-    sudo kubeadm join k8-t1-n1:6443 --token ${TOKEN} --discovery-token-ca-cert-hash sha256:${CERT_HASH}
+    sudo kubeadm join k8-t1-n1:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<CERT_HASH>
     ```
 
 ### kubectl Credentials for the master node
 
 kubectl stores credentials in a config file. Multiple credentials, or contexts, can be stored in the same file. Commands are sent to the active context.
 
-1. Log in to the master node and create a copy of the credentials that is readable by the pi user:
+1. Log in to the **master node** and create a copy of the credentials that is readable by the pi user:
 
     ```sh
     mkdir -p ~/.kube
@@ -116,7 +118,7 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
     sudo chown $(id -u):$(id -g) ~/.kube/config
     ```
 
-1. On your laptop or workstation copy the credentials file using scp:
+1. On your **laptop or workstation** copy the credentials file using scp:
 
     **Warning** If you have existing kubernetes configuration, back it up before executing the command below as it will overwrite the configuration.
 
