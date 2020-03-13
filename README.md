@@ -4,7 +4,7 @@ In this workshop we'll set up a raspberry pi cluster and run some configuration 
 
 ## Prerequsities
 
-The raspberry pi cluster is connected to the internet and is accessible from the workstation.
+The raspberry pi cluster is connected to the internet and is accessible from your laptop or workstation.
 
 Basic knowledge of linux and SSH is expected
 
@@ -111,18 +111,16 @@ kubectl stores credentials in a config file. Multiple credentials, or contexts, 
 1. Log in to the master node and create a copy of the credentials that is readable by the pi user:
 
     ```sh
-    ssh k8-t<team>-n1
     sudo cp /etc/kubernetes/admin.conf .
     sudo chown $(id -u):$(id -g) admin.conf
-    exit
     ```
 
-1. On your workstation copy the credentials file using scp:
+1. On your laptop or workstation copy the credentials file using scp:
 
     **Warning** If you have existing kubernetes configuration, back it up before executing the command below as it will overwrite the configuration.
 
     ```sh
-    mkdir -p ~/.kube/conf
+    mkdir -p ~/.kube/config
     scp pi@k8s-t<team>-n1.local:~/admin.conf ~/.kube/config
     ```
 
