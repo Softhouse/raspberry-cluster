@@ -547,7 +547,7 @@ Let's simulate some instabillity
     helm upgrade --install --force chaos stable/chaoskube \
     --set imageTag=v0.16.0-arm32v6 \
     --set namespaces=default \
-    --set labels='app!=nginx-ingress,blinkt=show' \
+    --set labels="app!=nginx-ingress\,blinkt=show" \
     --set dryRun=false \
     --set rbac.create=true \
     --set interval=1s
@@ -622,17 +622,16 @@ Affinity and anti-affinity can control which pods are scheduled together. Let's 
     Edit the `kubernetes-rocks.yaml` and comment in the affinity section:
 
     ```yaml
-      spec:
-        affinity:
-          podAntiAffinity:
+      affinity:
+        podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
-            topologyKey: "kubernetes.io/hostname"
-            matchExpressions:
-            - key: component
-              operator: In
-              values:
-              - default-backend
+              matchExpressions:
+              - key: component
+                operator: In
+                values:
+                - default-backend
+            topologyKey: "failure-domain.beta.kubernetes.io/zone"
     ```
 
     As the yellow worker pods are killed på chaos kube they should be scheduled separate from the pink default backend pods
