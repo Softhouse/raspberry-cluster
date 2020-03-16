@@ -547,7 +547,7 @@ Let's simulate some instabillity
     helm upgrade --install --force chaos stable/chaoskube \
     --set imageTag=v0.16.0-arm32v6 \
     --set namespaces=default \
-    --set labels='app!=nginx-ingress' \
+    --set labels='app!=nginx-ingress,blinkt=show' \
     --set dryRun=false \
     --set rbac.create=true \
     --set interval=1s
@@ -605,6 +605,8 @@ Time to patch the servers without service downtime
 
     `drain` cordons and evicts all workloads, moving them to other nodes.
 
+    **Note:** We ignore deamonsets since that would remove the controller for the LEDs, preventing updates when pods are moved
+
 1. Uncordon the node to allow workloads to be scheduled again.
 
     ```sh
@@ -617,21 +619,23 @@ Affinity and anti-affinity can control which pods are scheduled together. Let's 
 
 1. Add an anti-affinity to the worker pods:
 
-    ```sh
-        spec:
-          affinity:
-    #        podAntiAffinity:
-    #          requiredDuringSchedulingIgnoredDuringExecution:
-    #          - labelSelector:
-    #              matchExpressions:
-    #              - key: app
-    #                operator: In
-    #                values:
-    #                - nginx-ingress
-    #            topologyKey: "kubernetes.io/hostname"
+    Edit the `kubernetes-rocks.yaml` and comment in the affinity section:
+
+    ```yaml
+      spec:
+        affinity:
+          podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+            topologyKey: "kubernetes.io/hostname"
+            matchExpressions:
+            - key: component
+              operator: In
+              values:
+              - default-backend
     ```
 
-    As the yellow worker pods are killed på chaos kube they should be scheduled separate from the blue loadbalancer pods
+    As the yellow worker pods are killed på chaos kube they should be scheduled separate from the pink default backend pods
 
 1. Restart all the pods
 
@@ -645,18 +649,18 @@ Affinity and anti-affinity can control which pods are scheduled together. Let's 
 
 The kubernetes dashboard provides simple metrics and a graphical management tool for kubernetes.
 
-1. Apply the kubernetes-dashboard
-
-    ```sh
-    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/recommended.yaml
-    ```
-
 1. make the service account cluster admin.
 
     The kubernetes dashboard can only do what the logged in user is allowed to. Setting the service account as cluster admin and logging in as that user allows for cluster wide access. This is not reocommended for production systems:
 
     ```sh
     kubectl create clusterrolebinding kubernetes-dashboard-admin-binding --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:kubernetes-dashboard
+    ```
+
+1. Apply the kubernetes-dashboard
+
+    ```sh
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
     ```
 
 1. Get the auth token:
@@ -682,6 +686,22 @@ The kubernetes dashboard provides simple metrics and a graphical management tool
     ```
 
     browse to `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`, select **Token** login and paste the token from the above command.
+
+1. Add some metrics
+
+    Add some node metrics to kubernetes dashboard by adding a metrics scraper server
+
+    ```sh
+    helm upgrade --install metrics-server stable/metrics-server \
+    --set image.repository=gcr.io/google_containers/metrics-server-arm \
+    --set podLabels.blinkt=show \
+    --set args={"--kubelet-insecure-tls=true,--v=2,--kubelet-preferred-address-types=InternalIP\,Hostname\,ExternalIP"} \
+    --set podLabels.blinktColor=FF0000
+    ```
+
+    Navgigate to *Cluster* -> *Nodes* to see some node level metrics. The UI in Google Cloud is slightly different, but contains the same kind of information.
+
+    **Note:** Pod metrics and podLabels are curerntly not supported
 
 1. Accessing any service
 

@@ -35,16 +35,16 @@ spec:
         #blinktColor: FF00FF #pink
     spec:
       terminationGracePeriodSeconds: 0
-      # affinity:
+      #affinity:
       #  podAntiAffinity:
       #    requiredDuringSchedulingIgnoredDuringExecution:
       #    - labelSelector:
       #        matchExpressions:
-      #        - key: app
+      #        - key: component
       #          operator: In
       #          values:
-      #          - nginx-ingress
-      #      topologyKey: "kubernetes.io/hostname"
+      #          - default-backend
+      #      topologyKey: "failure-domain.beta.kubernetes.io/zone"
       containers:
       - name: kubernetes-rocks
         image: jonaseck/kubernetes-rocks
