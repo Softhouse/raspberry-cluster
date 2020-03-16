@@ -24,13 +24,13 @@ Each cluster consists of 4 nodes. Organize yourselves so that each team member c
 
 1. SSH into your node `k8-t<team>-n<node>`
 
-    **NOTE** On some machines, `.local`, `.lan` or `.localdomain` should be added as suffix.
+    **NOTE** Depending on your network or mDNS configuration, `.local`, `.lan` or `.localdomain` may have to be added as suffix to the host.
 
     ```sh
     ssh pi@k8-t<team>-n<node>
     ```
-    
-    **Example:** `ssh pi@k8-t1-n1`
+
+    **Example:** `ssh pi@k8-t1-n1.local`
 
 1. Install Docker
 
@@ -215,7 +215,7 @@ Table of LED colors:
 |Color       |Pods|
 |------------|----|
 |<span style="color:red">Red</span>  |whack a pod (initially)
-|<span style="color:green">Green</span>  |whack a pod (after upgrade)
+|<span style="color:white">White</span>  |whack a pod (after upgrade)
 |<span style="color:yellow">Yellow</span>  |node presentation
 |<span style="color:blue">Blue</span> | nginx ingress
 |<span style="color:purple">Purple</span> |404-service
@@ -334,21 +334,21 @@ This section is from [Source](https://github.com/apprenda/blinkt-k8s-controller)
 
     Kubernets uses rolling upgrades by default. That means that old pods are terminated (as many as the disriuption budget allows) as new ones are started. When the new pods answer on health checks the remaining pods are terminated. This means upgrades can be performed without downtime
 
-    Red is a negative color, edit the `deployment.yaml`, commenting out the `blinktColor: FF0000 #red` line and using a hash (#) character, and removing the comment from the `#blinktColor: 00FF00 #green`.
+    Red is a negative color, edit the `deployment.yaml`, commenting out the `blinktColor: FF0000 #red` line and using a hash (#) character, and removing the comment from the `#blinktColor: FFFFFF #white`.
 
     ```sh
     kubectl apply -f deployment.yaml
     ```
 
-    Leds should show pods gradually being terminated, replacing red with green. Looking at the whack a pod screen, you should see your moles being whacked and new ones appearing.
+    Leds should show pods gradually being terminated, replacing red with white. Looking at the whack a pod screen.
 
 1. Let's scale it:
 
     ```sh
-    kubectl scale --replicas=16 deployment/lmw-leaf
+    kubectl scale --replicas=12 deployment/lmw-leaf
     ```
 
-    Lot's of moles and green LEDs! Check the status
+    Lot's of moles and gren LEDs! Check the status
 
     ```sh
     kubectl get pods
@@ -461,13 +461,21 @@ Node 4 to the rescue!
 
     In the above example, the service is assigned to port 30631, browsing to `http://k8-t<team>-n<node>:30631` should show the page.
 
-1. Label the nodes to see where the application is running:
+    The port can also be fetched using JSONpath. The port
 
     ```sh
-    kubectl label node k8-t<team>-n1 failure-domain.beta.kubernetes.io/zone=k8-t1-n1
-    kubectl label node k8-t<team>-n2 failure-domain.beta.kubernetes.io/zone=k8-t1-n2
-    kubectl label node k8-t<team>-n3 failure-domain.beta.kubernetes.io/zone=k8-t1-n3
-    kubectl label node k8-t<team>-n4 failure-domain.beta.kubernetes.io/zone=k8-t1-n4
+    kubectl get svc kubernetes-rocks -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}'
+    ```
+
+1. Label the nodes to see where the application is running:
+
+    Node labels can also be used to inform applications where the service is running
+
+    ```sh
+    kubectl label node k8-t<team>-n1 failure-domain.beta.kubernetes.io/zone=k8-t<team>-n1
+    kubectl label node k8-t<team>-n2 failure-domain.beta.kubernetes.io/zone=k8-t<team>-n2
+    kubectl label node k8-t<team>-n3 failure-domain.beta.kubernetes.io/zone=k8-t<team>-n3
+    kubectl label node k8-t<team>-n4 failure-domain.beta.kubernetes.io/zone=k8-t<team>-n4
     ```
 
     The application uses the kubernetes API to determine which failure zone it is running in. When we design kubernetes clusters we generally want multiple nodes in each failure zone, in the event of zone availability.
@@ -498,7 +506,7 @@ We'll use helm to deploy a well defined configuration for this application. Helm
 
     ```sh
     helm upgrade --install --force ingress-controller stable/nginx-ingress \
-      --set controller.replicaCount=2 \
+      --set controller.kind=DaemonSet \
       --set controller.service.type=NodePort \
       --set controller.service.nodePorts.http=30080 \
       --set controller.service.nodePorts.https=30443 \
@@ -527,13 +535,13 @@ We'll use helm to deploy a well defined configuration for this application. Helm
 
     browse to `http://k8s-t<team>-n<node>:30080` and `https://k8s-t<team>-n<node>:30443`.
 
-    The nginx ingress controller provides a default self signed certificate for https.
+    The nginx ingress controller provides a default self signed certificate for https. If you get a warning for self-signed certificate
 
 ### Chaos
 
 Let's simulate some instabillity
 
-1. Install the kubernetes dashboard for simple service monitoring
+1. Install a disruption testing service that kills services randomly. Services being killed will blink in red, services starting up will blink green.
 
     ```sh
     helm upgrade --install --force chaos stable/chaoskube \
@@ -545,11 +553,24 @@ Let's simulate some instabillity
     --set interval=1s
     ```
 
+    **Note:** The label configuration prevents it from killing the nginx-ingress as it takes too long to start up.
+
 1. Let's generate some load  through the the NodePort service:
+
+    **Note:** If installing artillery as root `--ignore-scripts` might have to be appended to the command.
 
     ```sh
     npm install -g artillery
     artillery quick --count 10 -n 20 http://t<team>-n<node>:<port>
+    ```
+
+    or programatically
+
+    ```sh
+    npm install -g artillery
+    NODEPORT=$(kubectl get svc kubernetes-rocks -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
+    NODE=$(kubectl get nodes -o name | tail -1)
+    artillery quick --count 10 -n 20 http://${NODE#*/}:${NODEPORT}
     ```
 
     All traffic should generate an ok (200) response:
@@ -566,14 +587,14 @@ Let's simulate some instabillity
 
     ```sh
     artillery quick --count 10 -n 20 http://t<team>-n<node>:30080
-    artillery quick --count 10 -n 20 http://t<team>-n<node>:30443
+    artillery quick --count 10 -n 20 https//t<team>-n<node>:30443
     ```
 
 ### Maintenance
 
 Time to patch the servers without service downtime
 
-1. Cordon the node to prevent new pods from being scheduled:
+1. Cordon a randomly selected node to prevent new pods from being scheduled:
 
     ```sh
     kubectl cordon k8-t<team>-n1

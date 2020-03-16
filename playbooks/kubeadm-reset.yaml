@@ -1,0 +1,15 @@
+---
+- hosts: slaves
+  become: true
+  become_user: root
+  tasks:
+  - name: reset kubernetes node
+    shell: kubeadm reset -f
+  - name: remove config file
+    file:
+      path: ~/.kube/config
+      state: absent
+  - name: remove credentials file
+    file:
+      path: /etc/kubernetes/admin.conf
+      state: absent

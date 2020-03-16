@@ -29,13 +29,13 @@ spec:
       labels:
         app.kubernetes.io/name: lmw-leaf
         blinkt: show
-        #blinktColor: 00FF00 #green
         blinktColor: FF0000 #red
-        #blinktColor: FF8000 #yellow
-        #blinktColor: 00FFFF #aqua
+        #blinktColor: 00FF00 #green
         #blinktColor: 0000FF #blue
-        #blinktColor: 8000FF #purple
+        #blinktColor: FFFF00 #yellow
+        #blinktColor: 00FFFF #aqua
         #blinktColor: FF00FF #pink
+        #blinktColor: FFFFFF #white
     spec:
       terminationGracePeriodSeconds: 0
       tolerations:
