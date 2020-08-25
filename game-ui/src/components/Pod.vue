@@ -53,7 +53,7 @@ export default {
       // return names[Math.floor(Math.random() * names.length)];
       return this.hardLabel;
     },
-    cluster() { const a = this.nodename.split('-'); return a[1]; },
+    cluster() { return "unknown" },
   },
   data: () => ({
     hardLabel: 'unnamed'
@@ -69,7 +69,7 @@ export default {
     nodename: {
       type: String,
       required: false,
-      default: 'k8-unknown'
+      default: 'unknown'
     },
     state: {
       type: String,

@@ -10,26 +10,6 @@
       :team="team"
       :value="lpm[team]"
     ></l-p-m-display>
-    <!-- <l-p-m-display
-      team="5"
-      :value="lpm.t5"
-    ></l-p-m-display>
-    <l-p-m-display
-      team="4"
-      :value="lpm.t4"
-    ></l-p-m-display>
-    <l-p-m-display
-      team="3"
-      :value="lpm.t3"
-    ></l-p-m-display>
-    <l-p-m-display
-      team="2"
-      :value="lpm.t2"
-    ></l-p-m-display>
-    <l-p-m-display
-      team="1"
-      :value="lpm.t1"
-    ></l-p-m-display>-->
     </div> 
     <div>
       <div class="pod-holder">
@@ -69,7 +49,7 @@ export default {
     pummels: [],
     clusters: [],
     currentPod: undefined,
-    lpm: { t1: 0, t2: 0, t3: 0, t4: 0, t5: 0 },
+    lpm: { raspberrypi0: 0},
   }),
   mounted() {
     this.update();

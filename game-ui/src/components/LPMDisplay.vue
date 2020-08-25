@@ -77,7 +77,7 @@ export default {
   }
 }
 
-.t1 {
+.raspberrypi0 {
   color: #E72C2B;
 }
 

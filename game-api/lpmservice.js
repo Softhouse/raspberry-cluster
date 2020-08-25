@@ -2,11 +2,7 @@
 class LPMService {
   constructor() {
     this.targets = {
-      t1: [],
-      t2: [],
-      t3: [],
-      t4: [],
-      t5: []
+      raspberrypi0: []
     }
   }
 
