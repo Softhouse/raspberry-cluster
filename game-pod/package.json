@@ -5,5 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "fastify": "^2.10.0"
+  },
+  "scripts": {
+    "start": "node index.js"
   }
 }

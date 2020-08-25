@@ -6,3 +6,5 @@
 /config/deps/
 *secrets.yaml
 google-application-credentials.json
+package-lock.json
+node_modules/

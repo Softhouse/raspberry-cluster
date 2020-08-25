@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const { KubeConfig, CoreV1Api } = require('@kubernetes/client-node');
-const fileName = /^(.*?)\.yml$/;
+const fileName = /^(.*?)\.yaml$|^(.*?)\.yml$/;
 
 let cache;
 let clusters = {};

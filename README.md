@@ -171,3 +171,64 @@ Flannel is a simple and easy way to configure a layer 3 network fabric designed 
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 ```
 
+Wait until the coros pods are ready:
+
+```sh
+kubectl wait --for=condition=Ready pod -l k8s-app==kube-dns -n kube-system
+```
+
+## Blinkt
+
+1. Grant access to the blinkt pods to get pod information from the kubernetes API:
+
+    ```sh
+    kubectl create -f https://raw.githubusercontent.com/apprenda/blinkt-k8s-controller/master/kubernetes/blinkt-k8s-controller-rbac.yaml
+    kubectl create -f https://raw.githubusercontent.com/jonaseck2/raspberry-cluster/master/blinkt-k8s-controller-ds.yaml
+    ```
+
+1. Label the nodes to start the daemonset pods on the node
+
+   ```sh
+   kubectl label node --all deviceType=blinkt
+   ```
+
+1. Untaint the master to schedule a pod there as well
+
+   ```sh
+   kubectl taint nodes --all node-role.kubernetes.io/master-
+   ```
+
+## Whack a pod
+
+### game-api
+
+1. place the kubeconfig file in the api cluster folder
+
+```sh
+scp pi@raspberrypi0.local:~/.kube/config game-api/clusters/raspberrypi0.yaml
+```
+
+1. npm install and start
+
+```sh
+cd game-api
+npm install
+npm start
+```
+
+start a new terminal
+
+### game-ui
+
+1. npm install and start
+
+```sh
+npm install
+npm start
+```
+
+1. Add some moles
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/jonaseck2/raspberry-cluster/master/deployment.yaml
+```

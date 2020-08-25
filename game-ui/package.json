@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "start": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@feathersjs/socketio-client": "^4.3.11",
     "@vue/cli-plugin-babel": "^4.0.0",

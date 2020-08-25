@@ -1,6 +1,6 @@
 <template>
   <div class="scorboard-holder">
-    <div>IST Cloud presents</div>
+    <div>Softhouse presents</div>
     <div class="points">Whack-A-Pod</div>
     <div>{{ subtitle }}</div>
   </div>
