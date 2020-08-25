@@ -748,3 +748,9 @@ spec:
             cpu: 100m
 "
 ```
+
+You can scale it down again with_
+
+```sh
+kubectl scale deployment lmw-leaf --replicas=4
+```
