@@ -28,9 +28,9 @@ spec:
         blinkt: show
         #blinktColor: 00FF00 #green
         #blinktColor: FF0000 #red
-        blinktColor: "FFFF00" #yellow
+        #blinktColor: "FFFF00" #yellow
         #blinktColor: 00FFFF #aqua
-        #blinktColor: 0000FF #blue
+        blinktColor: 0000FF #blue
         #blinktColor: 8000FF #purple
         #blinktColor: FF00FF #pink
     spec:

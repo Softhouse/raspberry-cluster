@@ -232,3 +232,8 @@ npm start
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/jonaseck2/raspberry-cluster/master/deployment.yaml
 ```
+
+```sh
+kubectl scale deployment.v1.apps/lmw-leaf --replicas=25
+```
+
