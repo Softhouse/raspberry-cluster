@@ -487,7 +487,7 @@ We'll use helm to deploy a well defined configuration for this application. Helm
     This adds a repo uri and gives it the name stable.
 
     ```sh
-    helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+    helm repo add stable https://charts.helm.sh/stable
     ```
 
 1. Install an nginx based ingress controller:
@@ -647,7 +647,7 @@ The kubernetes dashboard provides simple metrics and a graphical management tool
 1. Apply the kubernetes-dashboard
 
     ```sh
-    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.2.0/aio/deploy/recommended.yaml
     ```
 
 1. Get the auth token:
@@ -737,7 +737,7 @@ spec:
 "
 ```
 
-You can scale it down again with_
+You can scale it down again with:
 
 ```sh
 kubectl scale deployment lmw-leaf --replicas=4
