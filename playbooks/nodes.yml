@@ -1,5 +1,5 @@
 ---
-- hosts: slaves
+- hosts: nodes
   become: yes
   become_user: root
   environment:
@@ -8,4 +8,4 @@
 
   roles:
     - common
-    - slaves
+    - nodes

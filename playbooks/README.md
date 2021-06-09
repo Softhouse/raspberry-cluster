@@ -10,10 +10,10 @@ The raspberry pies must be configured with static IP adresses, either locally or
 
 Configure the `hosts` file so the node names match up with the ip addresses
 
-1. update the `[slaves:children]`section to reflect the number of clusters:
+1. update the `[nodes:children]`section to reflect the number of clusters:
 
 ```sh
-[slaves:children]
+[nodes:children]
 t1
 t2
 ...
