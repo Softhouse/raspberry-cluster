@@ -63,6 +63,13 @@ The kubernetes API resides on the master node(s). The kubernetes CLI `kubectl` s
 
     **NOTE:** If you are assigned node number `4` do not join the cluster at this stage. If you accidentally do, please execute `sudo kubeadm reset` on the node and `kubectl delete node k8-t<team>-n4` to remove yourself from the cluster.
 
+    Reset the cluster if it has been configured before, and remove the CNI configuration which is not automatically cleared.
+
+    ```sh
+    sudo kubeadm reset
+    sudo rm -rf /etc/cni/net.d/*
+    ```
+
     ```sh
     sudo kubeadm init --token-ttl=10m
     ```
