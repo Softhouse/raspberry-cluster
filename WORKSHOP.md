@@ -255,9 +255,7 @@ Table of LED colors:
 1. Label the nodes to enable the blinkt controller
 
     ```sh
-    kubectl label node k8-t<team>-n1 deviceType=blinkt
-    kubectl label node k8-t<team>-n2 deviceType=blinkt
-    kubectl label node k8-t<team>-n3 deviceType=blinkt
+    kubectl label node deviceType=blinkt --all
     ```
 
     The leds should flash all green as the daemonset starts on the node.
@@ -279,7 +277,7 @@ Table of LED colors:
 1. remove the NoSchedule taint on the master node:
 
     ```sh
-    kubectl taint nodes k8-t<team>-n1 node-role.kubernetes.io/master:NoSchedule-
+    kubectl taint nodes node-role.kubernetes.io/master:NoSchedule- --all
     ```
 
     The LEDs will flash green on the master as the pod is scheduled and started.
