@@ -497,23 +497,18 @@ We'll use helm to deploy a well defined configuration for this application. Helm
     helm repo add stable https://charts.helm.sh/stable
     ```
 
-1. Install an nginx based ingress controller:
+1. Install a traefik based ingress controller:
 
     ```sh
-    helm upgrade --install --force ingress-controller stable/nginx-ingress \
-      --set controller.kind=DaemonSet \
-      --set controller.service.type=NodePort \
-      --set controller.service.nodePorts.http=30080 \
-      --set controller.service.nodePorts.https=30443 \
-      --set controller.service.omitClusterIP="true" \
-      --set controller.image.repository=quay.io/kubernetes-ingress-controller/nginx-ingress-controller-arm \
-      --set controller.podLabels.blinkt=show \
-      --set controller.podLabels.blinktColor=0000FF \
-      --set defaultBackend.replicaCount=2 \
-      --set defaultBackend.image.repository=gcr.io/google_containers/defaultbackend-arm \
-      --set defaultBackend.service.omitClusterIP="true" \
-      --set defaultBackend.podLabels.blinkt=show \
-      --set defaultBackend.podLabels.blinktColor=FF0080
+    helm repo add traefik https://helm.traefik.io/traefik
+    helm repo update
+    helm upgrade --install --force ingress-controller traefik/traefik \
+      --set deployment.kind=DaemonSet \
+      --set service.type=NodePort \
+      --set web.nodePort=30080 \
+      --set websecure.nodePort=30443 \
+      --set deployment.labels.blinkt=show \
+      --set deployment.labels.blinktColor=0000FF
     ```
 
     helm charts set *values* that are used in the templating of yaml files. In this example we set them on the command line directly, but normally this is provided in a values.yaml file and checked into version control.
@@ -542,7 +537,7 @@ Let's simulate some instabillity
     helm upgrade --install --force chaos stable/chaoskube \
     --set imageTag=v0.16.0-arm32v6 \
     --set namespaces=default \
-    --set labels="app!=nginx-ingress\,blinkt=show" \
+    --set labels="app.kubernetes.io/name=lmw-leaf\,blinkt=show" \
     --set dryRun=false \
     --set rbac.create=true \
     --set interval=1s
