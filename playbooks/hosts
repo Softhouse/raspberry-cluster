@@ -45,7 +45,7 @@ ansible_ssh_pass=raspberry
 deploy_target=pi
 #db-[99:101]-node.example.com
 
-[slaves:children]
+[nodes:children]
 t1
 t2
 t3

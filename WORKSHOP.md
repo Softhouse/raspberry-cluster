@@ -63,6 +63,13 @@ The kubernetes API resides on the master node(s). The kubernetes CLI `kubectl` s
 
     **NOTE:** If you are assigned node number `4` do not join the cluster at this stage. If you accidentally do, please execute `sudo kubeadm reset` on the node and `kubectl delete node k8-t<team>-n4` to remove yourself from the cluster.
 
+    Reset the cluster if it has been configured before, and remove the CNI configuration which is not automatically cleared.
+
+    ```sh
+    sudo kubeadm reset
+    sudo rm -rf /etc/cni/net.d/*
+    ```
+
     ```sh
     sudo kubeadm init --token-ttl=10m
     ```
@@ -248,9 +255,7 @@ Table of LED colors:
 1. Label the nodes to enable the blinkt controller
 
     ```sh
-    kubectl label node k8-t<team>-n1 deviceType=blinkt
-    kubectl label node k8-t<team>-n2 deviceType=blinkt
-    kubectl label node k8-t<team>-n3 deviceType=blinkt
+    kubectl label node deviceType=blinkt --all
     ```
 
     The leds should flash all green as the daemonset starts on the node.
@@ -272,7 +277,7 @@ Table of LED colors:
 1. remove the NoSchedule taint on the master node:
 
     ```sh
-    kubectl taint nodes k8-t<team>-n1 node-role.kubernetes.io/master:NoSchedule-
+    kubectl taint nodes node-role.kubernetes.io/master:NoSchedule- --all
     ```
 
     The LEDs will flash green on the master as the pod is scheduled and started.
@@ -487,26 +492,21 @@ We'll use helm to deploy a well defined configuration for this application. Helm
     This adds a repo uri and gives it the name stable.
 
     ```sh
-    helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+    helm repo add stable https://charts.helm.sh/stable
     ```
 
-1. Install an nginx based ingress controller:
+1. Install a traefik based ingress controller:
 
     ```sh
-    helm upgrade --install --force ingress-controller stable/nginx-ingress \
-      --set controller.kind=DaemonSet \
-      --set controller.service.type=NodePort \
-      --set controller.service.nodePorts.http=30080 \
-      --set controller.service.nodePorts.https=30443 \
-      --set controller.service.omitClusterIP="true" \
-      --set controller.image.repository=quay.io/kubernetes-ingress-controller/nginx-ingress-controller-arm \
-      --set controller.podLabels.blinkt=show \
-      --set controller.podLabels.blinktColor=0000FF \
-      --set defaultBackend.replicaCount=2 \
-      --set defaultBackend.image.repository=gcr.io/google_containers/defaultbackend-arm \
-      --set defaultBackend.service.omitClusterIP="true" \
-      --set defaultBackend.podLabels.blinkt=show \
-      --set defaultBackend.podLabels.blinktColor=FF0080
+    helm repo add traefik https://helm.traefik.io/traefik
+    helm repo update
+    helm upgrade --install --force ingress-controller traefik/traefik \
+      --set deployment.kind=DaemonSet \
+      --set service.type=NodePort \
+      --set web.nodePort=30080 \
+      --set websecure.nodePort=30443 \
+      --set deployment.labels.blinkt=show \
+      --set deployment.labels.blinktColor=0000FF
     ```
 
     helm charts set *values* that are used in the templating of yaml files. In this example we set them on the command line directly, but normally this is provided in a values.yaml file and checked into version control.
@@ -535,7 +535,7 @@ Let's simulate some instabillity
     helm upgrade --install --force chaos stable/chaoskube \
     --set imageTag=v0.16.0-arm32v6 \
     --set namespaces=default \
-    --set labels="app!=nginx-ingress\,blinkt=show" \
+    --set labels="app.kubernetes.io/name=lmw-leaf\,blinkt=show" \
     --set dryRun=false \
     --set rbac.create=true \
     --set interval=1s
@@ -647,7 +647,7 @@ The kubernetes dashboard provides simple metrics and a graphical management tool
 1. Apply the kubernetes-dashboard
 
     ```sh
-    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.2.0/aio/deploy/recommended.yaml
     ```
 
 1. Get the auth token:
@@ -737,7 +737,7 @@ spec:
 "
 ```
 
-You can scale it down again with_
+You can scale it down again with:
 
 ```sh
 kubectl scale deployment lmw-leaf --replicas=4

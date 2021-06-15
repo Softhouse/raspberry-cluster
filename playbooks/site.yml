@@ -6,5 +6,4 @@
     LC_ALL: C
     LANG: C
 
-
-  - import_playbook: slaves.yml
+  - import_playbook: nodes.yml

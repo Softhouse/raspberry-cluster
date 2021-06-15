@@ -1,5 +1,5 @@
 ---
-- hosts: slaves
+- hosts: nodes
   environment:
     LC_ALL: C
     LANG: C

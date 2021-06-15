@@ -33,9 +33,9 @@ echo "127.0.1.1	raspberrypi4" | sudo tee -a /etc/hosts
 1. Disable swap
 
 ```sh
-dphys-swapfile swapoff &&
-dphys-swapfile uninstall &&
-systemctl disable dphys-swapfile
+sudo dphys-swapfile swapoff &&
+sudo dphys-swapfile uninstall &&
+sudo systemctl disable dphys-swapfile
 ```
 
 1. Enable cgroups
@@ -168,7 +168,8 @@ sudo kubeadm join 192.168.1.101:6443 --token h6wf20.u2db8cdxr83hrloq \
 Flannel is a simple and easy way to configure a layer 3 network fabric designed for Kubernetes.
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+    kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+    kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-rbac.yml
 ```
 
 Wait until the coros pods are ready:

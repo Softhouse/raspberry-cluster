@@ -1,5 +1,5 @@
 ---
-- hosts: slaves
+- hosts: nodes
   become: true
   become_user: root
   tasks:
@@ -13,3 +13,8 @@
     file:
       path: /etc/kubernetes/admin.conf
       state: absent
+  - name: clean CNI configuration
+    file:
+      path: /etc/cni/net.d
+      state: absent
+      recurse: yes
